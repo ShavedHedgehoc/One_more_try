@@ -65,7 +65,7 @@ class W_user(models.Model):
         return self.w_user_name
 
 
-# Емкость
+# Емкость тест
 
 
 class Can(models.Model):
