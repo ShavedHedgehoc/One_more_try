@@ -1,0 +1,15 @@
+#{Document}
+"Name;Varka;Vypolnil;ShtrihkodEmkosti;Apparat"
+Взвешивание_18.11.2019_16.55.03_202;878D8;Кононов А.И.;98718112019165503202;144
+#{DeclaredItems}
+"Productid;Product.Name;DeclaredQuantity;CurrentQuantity"
+016267;Основа CU300/S3 Шампунь Поддержание цвета для окрашенных волос CUREX COLOR SAVE ;0;1812
+031704;Основа OTM.19 Тоник от перхоти OTIUM UNIQUE;0;787
+012528;Основа 4/7 Краска-уход De Luxe;0;1067
+012664;Основа 9/65 Крем-краска De Luxe Silver;0;985
+#{CurrentItems}
+"Productid;Product.Name;DeclaredQuantity;CurrentQuantity"
+016267;Основа CU300/S3 Шампунь Поддержание цвета для окрашенных волос CUREX COLOR SAVE ;0;1812
+031704;Основа OTM.19 Тоник от перхоти OTIUM UNIQUE;0;787
+012528;Основа 4/7 Краска-уход De Luxe;0;1067
+012664;Основа 9/65 Крем-краска De Luxe Silver;0;985
