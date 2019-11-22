@@ -1,4 +1,5 @@
 import datetime
+import requests
 from django.contrib.auth.models import User
 from django.core.exceptions import ValidationError
 from django.db import models
@@ -9,7 +10,103 @@ def validate_length(value):
         raise ValidationError("%s is not 20 digits" % value)
 
 
-# Варка
+class Vendor(models.Model):  # Поставщик
+
+    vendor_name = models.CharField(max_length=120, unique=True)
+
+    def __str__(self):
+        return self.vendor_name
+
+
+class Manufacturer(models.Model):  # Производитель
+    manufacturer_name = models.CharField(max_length=120, unique=True)
+
+    def __str__(self):
+        return self.manufacturer_name
+
+
+class Manufacturer_lot(models.Model):  # Партия производителя
+    manufacturer_lot_number = models.CharField(max_length=50, unique=True)
+
+    def __str__(self):
+        return self.manufacturer_lot_number
+
+
+class Material(models.Model):  # Сырье
+
+    code = models.CharField(max_length=6, unique=True)
+    marking = models.CharField(max_length=30, blank=True)
+    material_name = models.CharField(max_length=200)
+    unit = models.CharField(max_length=3, default="кг")
+    barcode = models.CharField(
+        max_length=13, unique=True, blank=True, null=True)
+
+    class Meta:
+        ordering = ["material_name"]
+
+    def save(self, *args, **kwargs):
+        ip = "192.168.1.13:9504"
+        # ip="srv-webts:9504"
+        id = self.code
+        request_txt = (
+            "http://" + ip +
+            "/MobileSMARTS/api/v1/Products('" +
+            id + "')"
+        )
+        response = requests.get(request_txt)
+        status = response.status_code
+        if status == 200:
+            data = response.json()
+            self.marking = data['marking']
+            d_barcode = data['packings'][0]['barcode']
+            if len(d_barcode) == 13:
+                self.barcode = d_barcode
+        else:
+            pass
+        super(Material, self).save(*args, **kwargs)
+
+    def __str__(self):
+        return self.code + " " + self.marking + " " + self.material_name
+
+
+class Lot(models.Model):  # Квазипартия
+    lot_code = models.CharField(max_length=20, unique=True)
+    material = models.ForeignKey(
+        Material, blank=True, null=True, on_delete=models.CASCADE)
+    vendor = models.ForeignKey(
+        Vendor, blank=True, null=True, on_delete=models.CASCADE)
+    manufacturer = models.ForeignKey(
+        Manufacturer, blank=True, null=True, on_delete=models.CASCADE)
+    manufacturer_lot = models.ForeignKey(
+        Manufacturer_lot, blank=True, null=True, on_delete=models.CASCADE)
+    lot_expire = models.DateField(blank=True, null=True)
+
+    def save(self, *args, **kwargs):
+        ip = "192.168.1.13:9504"
+        # ip="srv-webts:9504"
+        lot_id = self.lot_code
+        request_txt = (
+            "http://" + ip +
+            "/MobileSMARTS/api/v1/Tables/Lotpr('" +
+            lot_id + "')"
+        )
+        response = requests.get(request_txt)
+        status = response.status_code
+        if status == 200:
+            data = response.json()
+            self.vendor, _ = Vendor.objects.get_or_create(
+                vendor_name=data['provider'])
+            self.manufacturer, _ = Manufacturer.objects.get_or_create(
+                manufacturer_name=data['producer'])
+            self.manufacturer_lot, _ = Manufacturer_lot.objects.get_or_create(
+                manufacturer_lot_number=data['pr_Lot'])
+            self.lot_expire = data['expire'].split("T")[0]
+        else:
+            pass
+        super(Lot, self).save(*args, **kwargs)
+
+    def __str__(self):
+        return self.lot_code
 
 
 class Batch_pr(models.Model):
@@ -34,24 +131,6 @@ class Batch_pr(models.Model):
 
     def __str__(self):
         return self.batch_name
-
-
-# Сырье
-
-
-class Material(models.Model):
-
-    code = models.CharField(max_length=6, unique=True)
-    marking = models.CharField(max_length=30, blank=True)
-    material_name = models.CharField(max_length=200)
-    unit = models.CharField(max_length=3, default="кг")
-    barcode = models.CharField(max_length=13, unique=True, blank=True, null=True)
-
-    class Meta:
-        ordering = ["material_name"]
-
-    def __str__(self):
-        return self.code + " " + self.marking + " " + self.material_name
 
 
 # Пользователь
@@ -93,11 +172,6 @@ class Can(models.Model):
         return self.can_id
 
 
-class Vendor(models.Model):
-
-    vendor_name = models.CharField(max_length=40, unique=True)
-
-
 class Producer(models.Model):
 
     producer_name = models.CharField(max_length=40, unique=True)
@@ -108,8 +182,7 @@ class Producer_lot(models.Model):
     lot_name = models.CharField(max_length=40, unique=True)
 
 
-# Квазипартия
-class Lot(models.Model):
+""" class LLot(models.Model):
 
     lot_code = models.CharField(
         max_length=20, unique=True, validators=[validate_length]
@@ -128,30 +201,31 @@ class Lot(models.Model):
         Producer_lot, blank=True, null=True, on_delete=models.CASCADE
     )
     lot_expire = models.DateField(blank=True, null=True, editable=False)
-    
+
     def save(self, *args, **kwargs):
         lot_id=self.lot_code
         request_txt = (
-        "http://srv-webts:9504/MobileSMARTS/api/v1/Tables/Lotpr('" + lot_id + "')"
+        "http://srv-webts:9504/MobileSMARTS/api/v1/Tables/Lotpr('" + \
+                                                                lot_id + "')"
     )
         response = requests.get(request_txt)
         status = response.status_code
         if status=200:
             data=response.json()
             record=data["value"][0]
-            #self.lot_material=record['value']
+            # self.lot_material=record['value']
             self.lot_vendor=
             self.lot_date=
             self.lot_producer=
             self.lot_producer_lot=
             self.lot_expire=
         super(Lot, self).save(*args, **kwargs)
-    #def get_lots(self.lot_code):
+    # def get_lots(self.lot_code): """
 
 
-
+"""
     def __str__(self):
-        return self.lot_code
+        return self.lot_code """
 
 
 # Взвешивания
@@ -222,4 +296,3 @@ class Production2(models.Model):
     prod_batch = models.ForeignKey(Batch_pr, on_delete=models.CASCADE)
     prod_material = models.ForeignKey(Raw_material, on_delete=models.CASCADE)
     prod_decl_quantity = models.DecimalField(max_digits=7, decimal_places=3) """
-

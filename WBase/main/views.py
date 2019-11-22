@@ -13,8 +13,11 @@ from .models import Material
 def get_producer_lot():
     lot_id = "05554192102908201801"
     request_txt = (
-        "http://srv-webts:9504/MobileSMARTS/api/v1/Tables/Lotpr('" + lot_id + "')"
+        "http://192.168.1.13:9504/MobileSMARTS/api/v1/Tables/Lotpr('" + lot_id + "')"
     )
+    # request_txt = (
+    #     "http://srv-webts:9504/MobileSMARTS/api/v1/Tables/Lotpr('" + lot_id + "')"
+    # )
     #start = time.time()
     try:
         response = requests.get(request_txt)
