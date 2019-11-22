@@ -128,6 +128,27 @@ class Lot(models.Model):
         Producer_lot, blank=True, null=True, on_delete=models.CASCADE
     )
     lot_expire = models.DateField(blank=True, null=True, editable=False)
+    
+    def save(self, *args, **kwargs):
+        lot_id=self.lot_code
+        request_txt = (
+        "http://srv-webts:9504/MobileSMARTS/api/v1/Tables/Lotpr('" + lot_id + "')"
+    )
+        response = requests.get(request_txt)
+        status = response.status_code
+        if status=200:
+            data=response.json()
+            record=data["value"][0]
+            #self.lot_material=record['value']
+            self.lot_vendor=
+            self.lot_date=
+            self.lot_producer=
+            self.lot_producer_lot=
+            self.lot_expire=
+        super(Lot, self).save(*args, **kwargs)
+    #def get_lots(self.lot_code):
+
+
 
     def __str__(self):
         return self.lot_code
