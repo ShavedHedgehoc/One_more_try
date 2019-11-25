@@ -3,6 +3,7 @@ import json
 import time
 from django.shortcuts import render
 from .models import Material
+from requests.exceptions import ConnectionError
 
 # Create your views here.
 # Запрос партий производителя
@@ -18,7 +19,7 @@ def get_producer_lot():
     # request_txt = (
     #     "http://srv-webts:9504/MobileSMARTS/api/v1/Tables/Lotpr('" + lot_id + "')"
     # )
-    #start = time.time()
+    # start = time.time()
     try:
         response = requests.get(request_txt)
         data = response.status_code
@@ -34,10 +35,7 @@ def get_products():
         data = response.json()
         for one_record in data["value"]:
             material, _ = Material.objects.get_or_create(
-                code=one_record["id"],
-                marking=one_record["marking"],
-                material_name=one_record["name"],
-                unit=one_record["packings"][0]["name"],
+                code=one_record["id"], material_name=one_record["name"],
             )
     except:
         print(
@@ -107,7 +105,29 @@ def delete_document(doc_id):
 
 
 def index(request):
-    product_list = get_producer_lot()
+    try:
+        product_list=[]
+        ip = "192.168.1.13:9504"
+        #ip="srv-webts:9504"
+        request_txt = "http://" + ip + "/MobileSMARTS/api/v1/Docs/Vzveshivanie?$count=true"
+        response = requests.get(request_txt)
+        status = response.status_code
+        print(status)
+        if status == 200:
+            data = response.json()
+            quant = data["@odata.count"]
+            if quant != 0:
+                print("Works with docs!")
+                product_list = data            
+            else:
+                print("No docs to works!")
+                product_list = ["Ybxtuj ytn!"]
+        else:
+            print("Server not responce!")
+
+    except requests.exceptions.ConnectionError:
+        print("API Server connection error!")
+
     return render(request, "index.html", {"list": product_list})
 
 
