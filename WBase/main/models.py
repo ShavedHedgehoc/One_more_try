@@ -109,7 +109,7 @@ class Lot(models.Model):  # Квазипартия
         return self.lot_code
 
 
-class Batch_pr(models.Model):
+class Batch(models.Model):
 
     batch_name = models.CharField(max_length=20, unique=True)
     b_year = models.DecimalField(
@@ -127,7 +127,7 @@ class Batch_pr(models.Model):
         self.b_year = self.batch_name[-1]
         self.b_month = self.batch_name[-2]
         self.b_number = self.batch_name[:-2]
-        super(Batch_pr, self).save(*args, **kwargs)
+        super(Batch, self).save(*args, **kwargs)
 
     def __str__(self):
         return self.batch_name
@@ -153,7 +153,7 @@ class Can(models.Model):
     can_date = models.DateField(blank=True, editable=False)
     can_time = models.TimeField(blank=True, editable=False)
     can_device = models.CharField(max_length=3, blank=True, editable=False)
-    can_batch = models.ForeignKey(Batch_pr, on_delete=models.CASCADE)
+    can_batch = models.ForeignKey(Batch, on_delete=models.CASCADE)
     can_user = models.ForeignKey(W_user, on_delete=models.CASCADE)
 
     class Meta:
@@ -172,14 +172,6 @@ class Can(models.Model):
         return self.can_id
 
 
-class Producer(models.Model):
-
-    producer_name = models.CharField(max_length=40, unique=True)
-
-
-class Producer_lot(models.Model):
-
-    lot_name = models.CharField(max_length=40, unique=True)
 
 
 """ class LLot(models.Model):
