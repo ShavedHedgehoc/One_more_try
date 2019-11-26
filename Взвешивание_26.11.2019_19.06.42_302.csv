@@ -1,0 +1,11 @@
+#{Document}
+"Name;Varka;Vypolnil;ShtrihkodEmkosti;Apparat"
+Взвешивание_26.11.2019_19.06.42_302;287C9;Соловьев Д.М.;98726112019190642121;98
+#{DeclaredItems}
+"Productid;Product.Name;DeclaredQuantity;CurrentQuantity"
+009486;Основа Оксигент ESSEX 12 %;0;1512
+009800;"""Основа 6/0    Крем-краска """"ESTEL SENSE DE LUXE""""";0;1429
+#{CurrentItems}
+"Productid;Product.Name;DeclaredQuantity;CurrentQuantity"
+009486;Основа Оксигент ESSEX 12 %;0;1512
+009800;"""Основа 6/0    Крем-краска """"ESTEL SENSE DE LUXE""""";0;1429

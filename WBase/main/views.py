@@ -2,6 +2,7 @@ import requests
 import json
 import time
 from django.shortcuts import render
+from django.conf import settings
 from .models import Material
 from requests.exceptions import ConnectionError
 
@@ -73,14 +74,16 @@ def get_documents_list():
 
 
 def get_document_rows(doc_id):
+    ip = settings.GLOBAL_SETTINGS["API_SERVER_URL"]
     try:
-        request_prefix = "http://srv-webts:9504/MobileSMARTS/api/v1/Docs('"
+        # HTTP STATUS!!!
+        request_prefix = "http://" + ip + "/MobileSMARTS/api/v1/Docs('"
         request_postfix = ")/declaredItems?$expand=product"
         request_full = request_prefix + doc_id + request_postfix
         response = requests.get(request_full)
         get_data = response.json()
-    except:
-        pass
+    except requests.exceptions.ConnectionError:
+        print("API Server connection error!")
     return get_data
 
 
@@ -106,10 +109,11 @@ def delete_document(doc_id):
 
 def index(request):
     try:
-        product_list=[]
-        ip = "192.168.1.13:9504"
-        #ip="srv-webts:9504"
-        request_txt = "http://" + ip + "/MobileSMARTS/api/v1/Docs/Vzveshivanie?$count=true"
+        ip = settings.GLOBAL_SETTINGS["API_SERVER_URL"]
+        docs_list = []
+        request_prefix = "http://"
+        request_postfix = "/MobileSMARTS/api/v1/Docs/Vzveshivanie?$count=true"
+        request_txt = request_prefix + ip + request_postfix
         response = requests.get(request_txt)
         status = response.status_code
         print(status)
@@ -118,10 +122,13 @@ def index(request):
             quant = data["@odata.count"]
             if quant != 0:
                 print("Works with docs!")
-                product_list = data            
+                docs_list = data
+                for one_doc in docs_list["value"]:
+                    doc_rows = get_document_rows(one_doc["id"])
+                    product_list = doc_rows
             else:
                 print("No docs to works!")
-                product_list = ["Ybxtuj ytn!"]
+                product_list = ["No docs to works!"]
         else:
             print("Server not responce!")
 

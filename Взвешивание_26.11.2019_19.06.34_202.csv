@@ -1,0 +1,11 @@
+#{Document}
+"Name;Varka;Vypolnil;ShtrihkodEmkosti;Apparat"
+Взвешивание_26.11.2019_19.06.34_201;803G9;Син И.Х.;98726112019190634202;64
+#{DeclaredItems}
+"Productid;Product.Name;DeclaredQuantity;CurrentQuantity"
+011330;"""Основа """"ESTEL CELEBRITY"""" тон  CL 8/0 светло-русый""";0;1424
+025225;Аэросил P 202;0;917
+#{CurrentItems}
+"Productid;Product.Name;DeclaredQuantity;CurrentQuantity"
+011330;"""Основа """"ESTEL CELEBRITY"""" тон  CL 8/0 светло-русый""";0;1424
+025225;Аэросил P 202;0;917
