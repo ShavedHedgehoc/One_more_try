@@ -3,6 +3,8 @@ import requests
 from django.contrib.auth.models import User
 from django.core.exceptions import ValidationError
 from django.db import models
+from requests.exceptions import ConnectionError
+from django.conf import settings
 
 
 def validate_length(value):
@@ -44,8 +46,7 @@ class Material(models.Model):  # Сырье
         ordering = ["material_name"]
 
     def save(self, *args, **kwargs):
-        ip = "192.168.1.13:9504"
-        # ip="srv-webts:9504"
+        ip = settings.GLOBAL_SETTINGS["API_SERVER_URL"]        
         id = self.code
         request_txt = "http://" + ip + "/MobileSMARTS/api/v1/Products('" + id + "')"
         response = requests.get(request_txt)
@@ -78,16 +79,15 @@ class Lot(models.Model):  # Квазипартия
     )
     lot_expire = models.DateField(blank=True, null=True)
 
-    def save(self, *args, **kwargs):
-        ip = "192.168.1.13:9504"
-        # ip="srv-webts:9504"
+    def save(self, *args, **kwargs):        
+        ip = settings.GLOBAL_SETTINGS["API_SERVER_URL"]        
         lot_id = self.lot_code
         request_txt = (
             "http://" + ip + "/MobileSMARTS/api/v1/Tables/Lotpr('" + lot_id + "')"
         )
         response = requests.get(request_txt)
         status = response.status_code
-        if status == 200:
+        if status == 200:            
             data = response.json()
             self.vendor, _ = Vendor.objects.get_or_create(vendor_name=data["provider"])
             self.manufacturer, _ = Manufacturer.objects.get_or_create(
@@ -98,7 +98,7 @@ class Lot(models.Model):  # Квазипартия
             )
             self.lot_expire = data["expire"].split("T")[0]
         else:
-            pass
+            print("НЕ 200")
         super(Lot, self).save(*args, **kwargs)
 
     def __str__(self):

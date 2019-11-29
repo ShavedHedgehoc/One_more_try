@@ -40,7 +40,8 @@ if __name__ == "__main__":
     user_list = []
     product_list = []
     user_file = "Пользователи.csv"
-    product_file = "Номенклатура.csv"
+    #product_file = "Номенклатура.csv"
+    product_file = "output.csv"
     report_file = doc_name + ".csv"
     with open(user_file, "r", encoding="utf-8") as users:
         reader = csv.reader(users)
@@ -58,13 +59,13 @@ if __name__ == "__main__":
     rows_quantity = randint(1, 10)
     for row_number in range(1, rows_quantity):
         product = random.choice(product_list)
-        r_lot = "00031209641412201802"
+        #r_lot = "00031209641412201802"
         single_row = [
-            product[0].split(";")[1].strip(" "),  # Сюда вставить стрип
+            product[0].split(";")[2].strip(" "),  # Сюда вставить стрип
             product[0].split(";")[3],
             0,
             randint(1, 2000),
-            r_lot,
+            product[0].split(";")[0],
         ]
         rows_list.append(single_row)
     with open(report_file, "w", encoding="utf-8", newline="") as report:

@@ -1,0 +1,15 @@
+#{Document}
+"Name;Varka;Vypolnil;ShtrihkodEmkosti;Apparat"
+Взвешивание_29.11.2019_18.17.11_201;852D8;Пономаренко А.В.;98729112019181711301;130
+#{DeclaredItems}
+"Productid;Product.Name;DeclaredQuantity;CurrentQuantity;Partiya"
+022499;Персульфат калия (Potassium Persulfate);0;1451;03405143101710201703
+028841;Пигмент розовый С430В (CHIONE HD DIGITAL PINK S430V);0;699;10501099340711201602
+005874;Лаукозол 103 (Texapon SB 3 KC;0;705;08545146971411201701
+031564;Отдушка Keratin Repair 27 606 C;0;1430;05326112600103201703
+#{CurrentItems}
+"Productid;Product.Name;DeclaredQuantity;CurrentQuantity;Partiya"
+022499;Персульфат калия (Potassium Persulfate);0;1451;03405143101710201703
+028841;Пигмент розовый С430В (CHIONE HD DIGITAL PINK S430V);0;699;10501099340711201602
+005874;Лаукозол 103 (Texapon SB 3 KC;0;705;08545146971411201701
+031564;Отдушка Keratin Repair 27 606 C;0;1430;05326112600103201703
