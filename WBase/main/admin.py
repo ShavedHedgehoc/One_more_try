@@ -9,6 +9,7 @@ from .models import (
     Can,
     Lot,
     Weighting,
+    Declared_Batches,
 )
 
-admin.site.register((Batch_pr, Material, W_user, Can, Lot, Weighting,))
+admin.site.register((Batch_pr, Material, W_user, Can, Lot, Weighting,Declared_Batches,))

@@ -119,4 +119,8 @@ STATIC_URL = "/static/"
 
 GLOBAL_SETTINGS = {
     "API_SERVER_URL": "srv-webts:9504",  # "192.168.1.13:9504"
+    "W_LIST":[
+        "Взвешивание",
+    ]
+    
 }
