@@ -40,28 +40,28 @@ class Material(models.Model):  # Сырье
     marking = models.CharField(max_length=30, blank=True)
     material_name = models.CharField(max_length=200)
     unit = models.CharField(max_length=3, default="кг")
-    barcode = models.CharField(
-        max_length=13, unique=True, blank=True, null=True)
+    #barcode = models.CharField(
+    #    max_length=13, unique=True, blank=True, null=True)
 
     class Meta:
         ordering = ["material_name"]
 
-    ''' def save(self, *args, **kwargs):
-        ip = settings.GLOBAL_SETTINGS["API_SERVER_URL"]
-        id = self.code
-        request_txt = "http://" + ip + \
-            "/MobileSMARTS/api/v1/Products('" + id + "')"
-        response = requests.get(request_txt)
-        status = response.status_code
-        if status == 200:
-            data = response.json()
-            self.marking = data["marking"]
-            d_barcode = data["packings"][0]["barcode"]
-            if len(d_barcode) == 13:
-                self.barcode = d_barcode
-        else:
-            pass
-        super(Material, self).save(*args, **kwargs) '''
+    # def save(self, *args, **kwargs):
+    #     ip = settings.GLOBAL_SETTINGS["API_SERVER_URL"]
+    #     id = self.code
+    #     request_txt = "http://" + ip + \
+    #         "/MobileSMARTS/api/v1/Products('" + id + "')"
+    #     response = requests.get(request_txt)
+    #     status = response.status_code
+    #     if status == 200:
+    #         data = response.json()
+    #         self.marking = data["marking"]
+    #         d_barcode = data["packings"][0]["barcode"]
+    #         if len(d_barcode) == 13:
+    #             self.barcode = d_barcode
+    #     else:
+    #         pass
+    #     super(Material, self).save(*args, **kwargs)
 
     def __str__(self):
         return self.code + " " + self.marking + " " + self.material_name

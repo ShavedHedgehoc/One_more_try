@@ -3,7 +3,7 @@ import json
 import time
 from django.shortcuts import render
 from django.conf import settings
-from .models import Material, Can, Batch_pr, W_user, Weighting, Lot
+from .models import Material, Can, Batch_pr, W_user, Weighting, Lot,Declared_Batches
 from requests.exceptions import ConnectionError
 from django.views.generic.list import ListView
 
@@ -224,14 +224,17 @@ class Varka_view(ListView):
     
 
     def get_queryset(self, **kwargs):
-        queryset = Weighting.objects.all()
+        #queryset = Weighting.objects.all()
+        queryset = Declared_Batches.objects.all()
         return queryset
 
     def get_context_data(self, **kwargs):        
         varka = self.kwargs['batch']
         context = super(Varka_view, self).get_context_data(**kwargs)
         filter_set = self.get_queryset()
-        filter_set = filter_set.filter(weighting_id__can_batch__batch_name=varka)
+        #
+        # filter_set = filter_set.filter(weighting_id__can_batch__batch_name=varka)
+        filter_set = filter_set.filter(batch_pr__batch_name=varka)
         ''' rec = []
         for f in filter_set:
             qs = Weighting.objects.filter(
