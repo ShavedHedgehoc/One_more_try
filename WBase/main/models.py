@@ -82,6 +82,8 @@ class Lot(models.Model):  # Квазипартия
     )
     lot_expire = models.DateField(blank=True, null=True)
 
+    class Meta:
+            ordering = ["lot_code"]
     def save(self, *args, **kwargs):
         ip = settings.GLOBAL_SETTINGS["API_SERVER_URL"]
         lot_id = self.lot_code
@@ -105,6 +107,7 @@ class Lot(models.Model):  # Квазипартия
         else:
             print("НЕ 200")
         super(Lot, self).save(*args, **kwargs)
+    
 
     def __str__(self):
         return self.lot_code
