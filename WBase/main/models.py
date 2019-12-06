@@ -3,6 +3,8 @@ import requests
 from django.contrib.auth.models import User
 from django.core.exceptions import ValidationError
 from django.db import models
+from requests.exceptions import ConnectionError
+from django.conf import settings
 
 
 def validate_length(value):
@@ -38,16 +40,17 @@ class Material(models.Model):  # Сырье
     marking = models.CharField(max_length=30, blank=True)
     material_name = models.CharField(max_length=200)
     unit = models.CharField(max_length=3, default="кг")
-    barcode = models.CharField(max_length=13, unique=True, blank=True, null=True)
+    barcode = models.CharField(
+        max_length=13, unique=True, blank=True, null=True)
 
     class Meta:
         ordering = ["material_name"]
 
-    def save(self, *args, **kwargs):
-        ip = "192.168.1.13:9504"
-        # ip="srv-webts:9504"
+    ''' def save(self, *args, **kwargs):
+        ip = settings.GLOBAL_SETTINGS["API_SERVER_URL"]
         id = self.code
-        request_txt = "http://" + ip + "/MobileSMARTS/api/v1/Products('" + id + "')"
+        request_txt = "http://" + ip + \
+            "/MobileSMARTS/api/v1/Products('" + id + "')"
         response = requests.get(request_txt)
         status = response.status_code
         if status == 200:
@@ -58,7 +61,7 @@ class Material(models.Model):  # Сырье
                 self.barcode = d_barcode
         else:
             pass
-        super(Material, self).save(*args, **kwargs)
+        super(Material, self).save(*args, **kwargs) '''
 
     def __str__(self):
         return self.code + " " + self.marking + " " + self.material_name
@@ -69,7 +72,8 @@ class Lot(models.Model):  # Квазипартия
     material = models.ForeignKey(
         Material, blank=True, null=True, on_delete=models.CASCADE
     )
-    vendor = models.ForeignKey(Vendor, blank=True, null=True, on_delete=models.CASCADE)
+    vendor = models.ForeignKey(
+        Vendor, blank=True, null=True, on_delete=models.CASCADE)
     manufacturer = models.ForeignKey(
         Manufacturer, blank=True, null=True, on_delete=models.CASCADE
     )
@@ -79,17 +83,18 @@ class Lot(models.Model):  # Квазипартия
     lot_expire = models.DateField(blank=True, null=True)
 
     def save(self, *args, **kwargs):
-        ip = "192.168.1.13:9504"
-        # ip="srv-webts:9504"
+        ip = settings.GLOBAL_SETTINGS["API_SERVER_URL"]
         lot_id = self.lot_code
         request_txt = (
-            "http://" + ip + "/MobileSMARTS/api/v1/Tables/Lotpr('" + lot_id + "')"
+            "http://" + ip +
+            "/MobileSMARTS/api/v1/Tables/Lotpr('" + lot_id + "')"
         )
         response = requests.get(request_txt)
         status = response.status_code
         if status == 200:
             data = response.json()
-            self.vendor, _ = Vendor.objects.get_or_create(vendor_name=data["provider"])
+            self.vendor, _ = Vendor.objects.get_or_create(
+                vendor_name=data["provider"])
             self.manufacturer, _ = Manufacturer.objects.get_or_create(
                 manufacturer_name=data["producer"]
             )
@@ -98,7 +103,7 @@ class Lot(models.Model):  # Квазипартия
             )
             self.lot_expire = data["expire"].split("T")[0]
         else:
-            pass
+            print("НЕ 200")
         super(Lot, self).save(*args, **kwargs)
 
     def __str__(self):
@@ -186,3 +191,23 @@ class Weighting(models.Model):  # Взвешивания
             + " "
             + str(self.quantity)
         )
+
+
+class Declared_Batches(models.Model):
+    batch_pr = models.ForeignKey(Batch_pr, on_delete=models.CASCADE)
+    material = models.ForeignKey(Material, on_delete=models.CASCADE)
+    decl_quant = models.DecimalField(max_digits=7, decimal_places=3)
+
+
+class Meta:
+    ordering = ["batch_pr"]
+
+
+def __str__(self):
+    return (
+        str(self.batch_pr)
+        + " "
+        + str(self.material)
+        + " "
+        + str(self.decl_quant)
+    )

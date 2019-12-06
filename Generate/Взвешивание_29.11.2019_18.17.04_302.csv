@@ -1,0 +1,11 @@
+#{Document}
+"Name;Varka;Vypolnil;ShtrihkodEmkosti;Apparat"
+Взвешивание_29.11.2019_18.17.04_121;944I9;Соловьев Д.М.;98729112019181704121;136
+#{DeclaredItems}
+"Productid;Product.Name;DeclaredQuantity;CurrentQuantity;Partiya"
+014564;Отдушка Caribbian Splash;0;113;02763085831207201602
+025318;Эмолиент Дельта;0;451;07125262642711201902
+#{CurrentItems}
+"Productid;Product.Name;DeclaredQuantity;CurrentQuantity;Partiya"
+014564;Отдушка Caribbian Splash;0;113;02763085831207201602
+025318;Эмолиент Дельта;0;451;07125262642711201902

@@ -5,6 +5,7 @@ from django.shortcuts import render
 from django.conf import settings
 from .models import Material, Can, Batch_pr, W_user, Weighting, Lot
 from requests.exceptions import ConnectionError
+from django.views.generic.list import ListView
 
 # Create your views here.
 # Запрос партий производителя
@@ -88,10 +89,11 @@ def get_document_rows(doc_id):
 
 
 def get_documents_quant():
+    ip = settings.GLOBAL_SETTINGS["API_SERVER_URL"]
     try:
-        response = requests.get(
-            "http://srv-webts:9504/MobileSMARTS/api/v1/Docs/Vzveshivanie?$select=none&$count=true"
-        )
+        request_prefix="http://"
+        request_postfix="/MobileSMARTS/api/v1/Docs/Vzveshivanie?$select=none&$count=true"
+        response = requests.get(request_prefix+ip+request_postfix)            
         data = response.json()
         quant = data["@odata.count"]
     except:
@@ -108,6 +110,10 @@ def delete_document(doc_id):
 
 
 def index(request):
+    doc_quant=get_documents_quant()
+    return render(request,"index.html", {"list": doc_quant})
+
+def upload(request):
     try:
         ip = settings.GLOBAL_SETTINGS["API_SERVER_URL"]
         docs_list = []
@@ -147,7 +153,7 @@ def index(request):
                                     material_name=one_row["product"]["name"],
                                 )
                                 print(new_material_obj)
-                                new_lot_obj,_=Lot.objects.get_or_create(
+                                new_lot_obj,_= Lot.objects.get_or_create(
                                     lot_code=one_row["Partiya"],
                                     material=new_material_obj,
                                 )
@@ -171,7 +177,7 @@ def index(request):
     except requests.exceptions.ConnectionError:
         print("API Server connection error!")
 
-    return render(request, "index.html", {"list": product_list})
+    return render(request, "index.html")
 
 
 def index2(request):
@@ -200,3 +206,61 @@ def index2(request):
 
     return render(request, "index.html", {"list": product_list})
 
+class Batch_view(ListView):
+    template_name = "batch_view.html"
+
+    def get_queryset(self, **kwargs):
+        queryset = Batch_pr.objects.all()
+        return queryset
+
+    def get_context_data(self, **kwargs):
+        context = super(Batch_view, self).get_context_data(**kwargs)
+        filter_set = self.get_queryset()
+        context['records'] = filter_set
+        return context
+
+class Varka_view(ListView):
+    template_name = "listvar.html"
+    
+
+    def get_queryset(self, **kwargs):
+        queryset = Weighting.objects.all()
+        return queryset
+
+    def get_context_data(self, **kwargs):        
+        varka = self.kwargs['batch']
+        context = super(Varka_view, self).get_context_data(**kwargs)
+        filter_set = self.get_queryset()
+        filter_set = filter_set.filter(weighting_id__can_batch__batch_name=varka)
+        ''' rec = []
+        for f in filter_set:
+            qs = Weighting.objects.filter(
+                batch__batch_name=f.prod_batch.batch_name,
+                material__code=f.prod_material.code
+            ).values('lot__lot_code').annotate(ss=Sum('quantity'))
+            a = {
+                'prod_batch': f.prod_batch.batch_name,
+                'prod_material__code': f.prod_material.code,
+                'prod_material__material_name': f.prod_material.material_name,
+                'prod_decl_quantity': f.prod_decl_quantity,
+                'www': qs,
+                'lll': qs.count
+            }
+            rec.append(a) '''
+
+        # f_set= filter_set.values('prod_material__code')
+
+        # # ff_set=Weighting.objects.filter(batch__batch_name="100D9", material__code__in=f_set).annotate(ss=Sum('quantity'))
+        # # fff_set =ff_set.values('material','lot').annotate(ss=Sum('quantity'))
+        # filter_set = filter_set.filter(prod_batch__batch_name="100D9")
+        # context['records2'] = f_set
+        # f_obj=filter_set.values('prod_material__code','prod_material__material_name').annotate(tt=Sum('prod_decl_quantity'))
+        # filter_set = filter_set.values('prod_batch','prod_material').annotate(tt=Sum('prod_decl_quantity'))
+        # # filter_set = filter_set.filter(prod_batch__batch_name="101D9").annotate(tt=Sum('prod_decl_quantity'))
+        # ff_set=Weighting.objects.filter(batch__batch_name="100D9").values('batch')
+        # context['records3'] = filter_set
+        
+        
+        #context['records3'] = rec
+        context['records'] = filter_set
+        return context

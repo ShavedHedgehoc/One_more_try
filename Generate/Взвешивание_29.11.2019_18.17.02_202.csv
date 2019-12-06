@@ -1,0 +1,11 @@
+#{Document}
+"Name;Varka;Vypolnil;ShtrihkodEmkosti;Apparat"
+Взвешивание_29.11.2019_18.17.02_201;37A8;Мешков В.В.;98729112019181702201;104
+#{DeclaredItems}
+"Productid;Product.Name;DeclaredQuantity;CurrentQuantity;Partiya"
+001935;Цетиол (Cetiol PGL) (Cetiol 868);0;275;08545083502406201605
+014938;Силикон SF1632;0;1178;04918186492607201801
+#{CurrentItems}
+"Productid;Product.Name;DeclaredQuantity;CurrentQuantity;Partiya"
+001935;Цетиол (Cetiol PGL) (Cetiol 868);0;275;08545083502406201605
+014938;Силикон SF1632;0;1178;04918186492607201801

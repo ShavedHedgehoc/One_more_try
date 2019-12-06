@@ -1,0 +1,38 @@
+{% extends "base.html" %}
+{% block content %}
+<form>
+<div class="form-group">
+<div>
+<label for ="batch">Варка</label>
+<input type="text" name="batch" id="batch" value="">
+<input type="checkbox" name="batch-use">
+</div>
+<div>
+<label for ="material">Сырье</label>
+<input type="text" name="material" id="material" value="">
+</div>
+<div>
+<label for ="lot">Партия</label>
+<input type="text" name="lot" id="lot" value=""> 
+</div>
+<input type="submit" name="filter" value="Отобрать">
+
+</div>
+
+
+</form>
+
+<table class="table table-striped">
+    <tbody>    
+        {% for i in records %}
+        <tr>   
+                <td><a href="{{i.batch_name }}">{{i.batch_name }}</a></td>
+            
+            
+        </tr>
+        {% empty %}
+        <td>Задайте параметры для отображения...</td>
+        {% endfor %}
+</tbody>
+</table>
+{% endblock%}
