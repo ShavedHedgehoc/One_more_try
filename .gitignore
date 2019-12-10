@@ -2,3 +2,4 @@
 _pycahe_
 env
 .vscode
+.sqlite3

@@ -6,6 +6,7 @@ from django.conf import settings
 from .models import Material, Can, Batch_pr, W_user, Weighting, Lot,Declared_Batches
 from requests.exceptions import ConnectionError
 from django.views.generic.list import ListView
+from django.db.models import Sum
 
 # Create your views here.
 # Запрос партий производителя
@@ -223,33 +224,37 @@ class Varka_view(ListView):
     template_name = "listvar.html"
     
 
-    def get_queryset(self, **kwargs):
-        #queryset = Weighting.objects.all()
+    def get_queryset(self, **kwargs):   
         queryset = Declared_Batches.objects.all()
         return queryset
-
+    
     def get_context_data(self, **kwargs):        
         varka = self.kwargs['batch']
         context = super(Varka_view, self).get_context_data(**kwargs)
-        filter_set = self.get_queryset()
-        #
-        # filter_set = filter_set.filter(weighting_id__can_batch__batch_name=varka)
-        filter_set = filter_set.filter(batch_pr__batch_name=varka)
-        ''' rec = []
-        for f in filter_set:
+        filter_set = self.get_queryset()        
+        filter_set = filter_set.filter(batch_pr__batch_name=varka)        
+        rec=[]
+        for f in filter_set:            
+            #print(f)
             qs = Weighting.objects.filter(
-                batch__batch_name=f.prod_batch.batch_name,
-                material__code=f.prod_material.code
-            ).values('lot__lot_code').annotate(ss=Sum('quantity'))
-            a = {
-                'prod_batch': f.prod_batch.batch_name,
-                'prod_material__code': f.prod_material.code,
-                'prod_material__material_name': f.prod_material.material_name,
-                'prod_decl_quantity': f.prod_decl_quantity,
-                'www': qs,
-                'lll': qs.count
-            }
-            rec.append(a) '''
+                weighting_id__can_batch__batch_name=f.batch_pr.batch_name                
+                ).filter(
+                material__code=f.material.code    
+                )
+            qqq=qs.count()
+            if qqq>0:
+                fs=qs.values('lot__lot_code').annotate(Sum('quantity'))
+                ff=qs.aggregate(Sum('quantity'))
+                print (fs)
+                print(ff)
+                a = {
+                    'code': f.material.code,
+                    'name': f.material.material_name,
+                    'decl_quantity': f.decl_quant,
+                    'cur_quantity': ff['quantity__sum'],
+                
+                }
+                rec.append(a) 
 
         # f_set= filter_set.values('prod_material__code')
 
@@ -265,5 +270,8 @@ class Varka_view(ListView):
         
         
         #context['records3'] = rec
+        #context['records','r2'] = (filter_set,a)
+        
         context['records'] = filter_set
+        context['rs'] = rec
         return context

@@ -2,9 +2,13 @@
 
 {% block content %}
 {% for i in records %}
-</p>{{i}}<p>
+</p>{{i.material.code}}<p>
 {%endfor%}
+</p>------------------------<p>
+{%for j in rs%}
+</p> {{j}}<p>
 
+{%endfor%}
 
 
 
