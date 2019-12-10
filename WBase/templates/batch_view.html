@@ -26,12 +26,12 @@
     <tbody>    
         {% for i in records %}
         <tr>   
-                <td><a href="{{i.batch_name }}">{{i.batch_name }}</a></td>
+                <td><a href="{{i.batch_name }}">{{i.d}}  -  {{i.w}}--{{i}}</a></td>
             
             
         </tr>
         {% empty %}
-        <td>Задайте параметры для отображения...</td>
+        <td>Нет варок за этот период...</td>
         {% endfor %}
 </tbody>
 </table>

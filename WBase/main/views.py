@@ -3,10 +3,10 @@ import json
 import time
 from django.shortcuts import render
 from django.conf import settings
-from .models import Material, Can, Batch_pr, W_user, Weighting, Lot,Declared_Batches
+from .models import Material, Can, Batch_pr, W_user, Weighting, Lot, Declared_Batches
 from requests.exceptions import ConnectionError
 from django.views.generic.list import ListView
-from django.db.models import Sum
+from django.db.models import Sum, Count
 
 # Create your views here.
 # Запрос партий производителя
@@ -17,7 +17,8 @@ from django.db.models import Sum
 def get_producer_lot():
     lot_id = "05554192102908201801"
     request_txt = (
-        "http://192.168.1.13:9504/MobileSMARTS/api/v1/Tables/Lotpr('" + lot_id + "')"
+        "http://192.168.1.13:9504/MobileSMARTS/api/v1/Tables/Lotpr('" +
+        lot_id + "')"
     )
     # request_txt = (
     #     "http://srv-webts:9504/MobileSMARTS/api/v1/Tables/Lotpr('" + lot_id + "')"
@@ -34,7 +35,8 @@ def get_producer_lot():
 def get_products():
     start = time.time()
     try:
-        response = requests.get("http://srv-webts:9504/MobileSMARTS/api/v1/Products")
+        response = requests.get(
+            "http://srv-webts:9504/MobileSMARTS/api/v1/Products")
         data = response.json()
         for one_record in data["value"]:
             material, _ = Material.objects.get_or_create(
@@ -92,9 +94,9 @@ def get_document_rows(doc_id):
 def get_documents_quant():
     ip = settings.GLOBAL_SETTINGS["API_SERVER_URL"]
     try:
-        request_prefix="http://"
-        request_postfix="/MobileSMARTS/api/v1/Docs/Vzveshivanie?$select=none&$count=true"
-        response = requests.get(request_prefix+ip+request_postfix)            
+        request_prefix = "http://"
+        request_postfix = "/MobileSMARTS/api/v1/Docs/Vzveshivanie?$select=none&$count=true"
+        response = requests.get(request_prefix+ip+request_postfix)
         data = response.json()
         quant = data["@odata.count"]
     except:
@@ -111,8 +113,9 @@ def delete_document(doc_id):
 
 
 def index(request):
-    doc_quant=get_documents_quant()
-    return render(request,"index.html", {"list": doc_quant})
+    doc_quant = get_documents_quant()
+    return render(request, "index.html", {"list": doc_quant})
+
 
 def upload(request):
     try:
@@ -154,7 +157,7 @@ def upload(request):
                                     material_name=one_row["product"]["name"],
                                 )
                                 print(new_material_obj)
-                                new_lot_obj,_= Lot.objects.get_or_create(
+                                new_lot_obj, _ = Lot.objects.get_or_create(
                                     lot_code=one_row["Partiya"],
                                     material=new_material_obj,
                                 )
@@ -207,6 +210,7 @@ def index2(request):
 
     return render(request, "index.html", {"list": product_list})
 
+
 class Batch_view(ListView):
     template_name = "batch_view.html"
 
@@ -214,47 +218,80 @@ class Batch_view(ListView):
         queryset = Batch_pr.objects.all()
         return queryset
 
+    def get_cur_month(self, **kwargs):
+        m = "C"
+        return m
+
+    def get_cur_year(self, **kwargs):
+        y = 9
+        return y
+
+    def get_decl_rows_count(self, **kwargs):
+        batch = self.kwargs['batch_name']
+        d_count = Declared_Batches.objects.filter(
+            batch_pr__batch_name=batch).count()
+        return d_count
+
     def get_context_data(self, **kwargs):
         context = super(Batch_view, self).get_context_data(**kwargs)
+        f_year = self.get_cur_year()
+        f_month = self.get_cur_month()
         filter_set = self.get_queryset()
+
+        filter_set = Batch_pr.objects.annotate(
+            d=Count('declared_batches', distinct=True),
+            w=Count('can__weighting__material', distinct=True)
+        ).filter(b_month=f_month, b_year=f_year)
+
         context['records'] = filter_set
         return context
 
+
 class Varka_view(ListView):
     template_name = "listvar.html"
-    
 
-    def get_queryset(self, **kwargs):   
+    def get_queryset(self, **kwargs):
         queryset = Declared_Batches.objects.all()
         return queryset
-    
-    def get_context_data(self, **kwargs):        
+
+    def get_context_data(self, **kwargs):
         varka = self.kwargs['batch']
         context = super(Varka_view, self).get_context_data(**kwargs)
-        filter_set = self.get_queryset()        
-        filter_set = filter_set.filter(batch_pr__batch_name=varka)        
-        rec=[]
-        for f in filter_set:            
-            #print(f)
-            qs = Weighting.objects.filter(
-                weighting_id__can_batch__batch_name=f.batch_pr.batch_name                
+        filter_set = self.get_queryset()
+        filter_set = filter_set.filter(batch_pr__batch_name=varka)
+        records = []
+        for f in filter_set:
+            m_rws_qount = Weighting.objects.filter(
+                weighting_id__can_batch__batch_name=f.batch_pr.batch_name
+            ).filter(
+                material__code=f.material.code
+            ).count()
+            lots_list = []
+            w_quant = 0
+            if m_rws_qount > 0:
+                m_rws = Weighting.objects.filter(
+                    weighting_id__can_batch__batch_name=f.batch_pr.batch_name
                 ).filter(
-                material__code=f.material.code    
+                    material__code=f.material.code
                 )
-            qqq=qs.count()
-            if qqq>0:
-                fs=qs.values('lot__lot_code').annotate(Sum('quantity'))
-                ff=qs.aggregate(Sum('quantity'))
-                print (fs)
-                print(ff)
-                a = {
-                    'code': f.material.code,
-                    'name': f.material.material_name,
-                    'decl_quantity': f.decl_quant,
-                    'cur_quantity': ff['quantity__sum'],
-                
-                }
-                rec.append(a) 
+                lots_rows = m_rws.values(
+                    'lot__lot_code').annotate(Sum('quantity'))
+
+                w_quant = m_rws.aggregate(Sum('quantity'))['quantity__sum']
+                for one_lot in lots_rows:
+                    lot = {
+                        'lot': one_lot['lot__lot_code'],
+                        'quant': one_lot['quantity__sum'],
+                    }
+                    lots_list.append(lot)
+            row = {
+                'code': f.material.code,
+                'name': f.material.material_name,
+                'decl_quantity': f.decl_quant,
+                'cur_quantity': w_quant,
+                'lots': lots_list,
+            }
+            records.append(row)
 
         # f_set= filter_set.values('prod_material__code')
 
@@ -267,11 +304,9 @@ class Varka_view(ListView):
         # # filter_set = filter_set.filter(prod_batch__batch_name="101D9").annotate(tt=Sum('prod_decl_quantity'))
         # ff_set=Weighting.objects.filter(batch__batch_name="100D9").values('batch')
         # context['records3'] = filter_set
-        
-        
+
         #context['records3'] = rec
         #context['records','r2'] = (filter_set,a)
-        
-        context['records'] = filter_set
-        context['rs'] = rec
+
+        context['records'] = records
         return context
