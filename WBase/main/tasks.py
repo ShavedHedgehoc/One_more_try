@@ -3,12 +3,14 @@ import requests
 import json
 import time
 import datetime
+import logging
 
 # from django.shortcuts import render
 from django.conf import settings
 from .models import Material, Can, Batch_pr, W_user, Weighting, Lot, Declared_Batches
 from requests.exceptions import ConnectionError
 
+logger = logging.getLogger(__name__)
 
 def get_document_rows(doc_id):
     ip = settings.GLOBAL_SETTINGS["API_SERVER_URL"]
@@ -31,6 +33,10 @@ def get_now():
 
 @task(schedule=30)
 def upload():
+    
+    logger.warning("Upload documents running!")
+    logger.error("!!!!!!!!")
+    logger.info("fsfsdf")
     print("%s  -  Upload documents running!" % get_now())
     start = time.time()
     try:
@@ -69,6 +75,13 @@ def upload():
                             can_user=new_w_user_obj,
                         )
                         if new_can_status:
+                            new_doc_status = True
+                        else:
+                            if Weighting.objects.filter(weighting_id=new_can_obj).exists():
+                                new_doc_status = False
+                            else:
+                                new_doc_status = True
+                        if new_doc_status:
                             print("Created new can %s..." % one_doc["ShtrihkodEmkosti"])
                             doc_rows = get_document_rows(one_doc["id"])
                             if doc_rows["@odata.count"] != 0:
@@ -86,7 +99,10 @@ def upload():
                                         new_material_obj.save()
                                         print(
                                             "Created new material %s %s"
-                                            % (one_row["product"]["id"], one_row["product"]["name"])
+                                            % (
+                                                one_row["product"]["id"],
+                                                one_row["product"]["name"],
+                                            )
                                         )
                                     except:
                                         print(
