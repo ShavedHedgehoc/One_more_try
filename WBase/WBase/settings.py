@@ -126,7 +126,7 @@ GLOBAL_SETTINGS = {
 
 LOGGING = {
     "version": 1,
-    "disable_existing_loggers": True,
+    "disable_existing_loggers": False,
     "handlers": {
         "file": {
             "level": "INFO",
@@ -135,5 +135,5 @@ LOGGING = {
            },
            
     },
-    "loggers": {"123": {'level': "INFO", 'handlers': ['file'],},}
+    "loggers": {"123": {'level': "INFO", 'handlers': ['file']}}
 }
