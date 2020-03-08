@@ -25,7 +25,7 @@ if __name__ == '__main__':
                                          columns=['ПартияГП', 'КодНЗ', 'АртикулНЗ', 'ПартияНЗ'])
                 df_batch = pd.concat(
                     [df_batch, batch_row], ignore_index=True)
-            elif row[1] == "Код":
+            elif row[0] == "код":
                 pass
             else:
                 summary_row = pd.DataFrame([[cur_date, row[0], row[3], row[4], row[8]]],
